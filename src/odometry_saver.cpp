@@ -129,8 +129,6 @@ public:
 private:
   void timer_callback(const ros::WallTimerEvent &e) {
     std::cout << "--- saver queues ---" << std::endl;
-    std::cout << "points:" << points_save_queue.size()
-              << "  odometry:" << odometry_save_queue.size() << std::endl;
 
     ROS_INFO_STREAM("queue points:" << points_save_queue.size()
                                     << "  odometry:" << odometry_save_queue.size());
