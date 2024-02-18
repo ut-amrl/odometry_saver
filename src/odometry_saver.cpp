@@ -2,6 +2,7 @@
 #include <Eigen/Geometry>
 #include <atomic>
 #include <condition_variable>
+#include <fstream>
 #include <iostream>
 #include <mutex>
 #include <thread>
@@ -122,9 +123,23 @@ public:
 
     timer = nh.createWallTimer(ros::WallDuration(1.0),
                                &OdometrySaverNode::timer_callback, this);
+
+    std::string file_path = dst_directory + "/pose.txt";
+    std::cout << "pose file path: " << file_path << std::endl;
+    if (std::filesystem::exists(file_path)) {
+      std::filesystem::remove(file_path);
+    }
+    pose_file_.open(file_path, std::ios::out | std::ios::app);
+    if (!pose_file_.is_open()) {
+      ROS_ERROR_STREAM("failed to open file: " << file_path);
+    }
   }
 
-  ~OdometrySaverNode() {}
+  ~OdometrySaverNode() {
+    if (pose_file_.is_open()) {
+      pose_file_.close();
+    }
+  }
 
 private:
   void timer_callback(const ros::WallTimerEvent &e) {
@@ -157,22 +172,31 @@ private:
             .toRotationMatrix();
 
     Eigen::Matrix4d result = odom2base * odombase2odom * origin2odom;
-    Eigen::Quaterniond quat(result.block<3, 3>(0, 0));
+    Eigen::Vector3d t(result.block<3, 1>(0, 3));
+    Eigen::Quaterniond q(result.block<3, 3>(0, 0));
 
-    nav_msgs::OdometryPtr transformed(new nav_msgs::Odometry);
-    *transformed = *odometry_msg;
+    // Save transformed odometry
+    nav_msgs::OdometryPtr transformed_odometry_msg(new nav_msgs::Odometry());
+    *transformed_odometry_msg = *odometry_msg;
+    transformed_odometry_msg->header.frame_id = origin_frame;
+    transformed_odometry_msg->child_frame_id = endpoint_frame;
+    transformed_odometry_msg->pose.pose.position.x = t.x();
+    transformed_odometry_msg->pose.pose.position.y = t.y();
+    transformed_odometry_msg->pose.pose.position.z = t.z();
+    transformed_odometry_msg->pose.pose.orientation.w = q.w();
+    transformed_odometry_msg->pose.pose.orientation.x = q.x();
+    transformed_odometry_msg->pose.pose.orientation.y = q.y();
+    transformed_odometry_msg->pose.pose.orientation.z = q.z();
 
-    auto &dst_pose = transformed->pose.pose;
-    dst_pose.position.x = result(0, 3);
-    dst_pose.position.y = result(1, 3);
-    dst_pose.position.z = result(2, 3);
+    odometry_save_queue.push(transformed_odometry_msg);
 
-    dst_pose.orientation.w = quat.w();
-    dst_pose.orientation.x = quat.x();
-    dst_pose.orientation.y = quat.y();
-    dst_pose.orientation.z = quat.z();
-
-    odometry_save_queue.push(transformed);
+    // Save pose to file
+    if (pose_file_.is_open()) {
+      pose_file_ << std::fixed << std::setprecision(6)
+                 << odometry_msg->header.stamp.toSec() << " " << std::fixed
+                 << std::setprecision(8) << t.x() << " " << t.y() << " " << t.z() << " "
+                 << q.w() << " " << q.x() << " " << q.y() << " " << q.z() << std::endl;
+    }
   }
 
   Eigen::Matrix4d lookup_eigen(const std::string &target, const std::string &source,
@@ -204,6 +228,7 @@ private:
   std::string dst_directory;
   SaveQueue<sensor_msgs::PointCloud2ConstPtr> points_save_queue;
   SaveQueue<nav_msgs::OdometryConstPtr> odometry_save_queue;
+  std::ofstream pose_file_;
 
   ros::Subscriber points_sub;
   ros::Subscriber odometry_sub;
