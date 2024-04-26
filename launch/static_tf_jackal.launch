@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- static TF for Jackal -->
+
+<launch>
+  <!-- Transform from 'body' to 'camera' -->
+  <node pkg="tf" type="static_transform_publisher" name="body_to_camera_tf_publisher"
+    args="-0.034803 0.010012 0.424886 -0.012760 -0.000335 -0.120106 0.992679 body camera 100" />
+</launch>

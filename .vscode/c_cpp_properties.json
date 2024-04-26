@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/opt/ros/noetic/include/**",
+        "/home/dongmyeong/Projects/interactive_slam/devel/include/**",
+        "/home/dongmyeong/Projects/interactive_slam/src/fast_gicp/include/**",
+        "/home/dongmyeong/Projects/interactive_slam/src/hdl_graph_slam/include/**",
+        "/home/dongmyeong/Projects/interactive_slam/src/interactive_slam/include/**",
+        "/home/dongmyeong/Projects/interactive_slam/src/ndt_omp/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}

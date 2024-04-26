@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <arg name="dst_directory" default="/tmp/odometry"/>
+    <arg name="points_topic" default="/cloud_registered_body"/>
+    <arg name="odom_topic" default="/aft_mapped_to_init"/>
+    <arg name="endpoint_frame" default="camera"/>
+    <arg name="origin_frame" default="camera_init"/>
+
+    <arg name="save_pose_only" default="false"/>
+    <arg name="pose_file" default="/tmp/odometry/pose.txt"/>
+
+    <param name="use_sim_time" value="true"/>
+
+    <node pkg="odometry_saver" type="odometry_saver" name="odometry_saver" output="screen">
+        <param name="dst_directory" value="$(arg dst_directory)"/>
+        <param name="origin_frame" value="$(arg origin_frame)"/>
+        <param name="endpoint_frame" value="$(arg endpoint_frame)"/>
+        <param name="save_pose_only" value="$(arg save_pose_only)"/>
+        <param name="pose_file" value="$(arg pose_file)"/>
+        <remap from="/points" to="$(arg points_topic)"/>
+        <remap from="/odom" to="$(arg odom_topic)"/>
+    </node>
+
+    <!-- static TF (body -> camera) -->
+    <arg name="dataset" default="coda" />
+    <include file="$(find odometry_saver)/launch/static_tf_$(arg dataset).launch" /> 
+</launch>

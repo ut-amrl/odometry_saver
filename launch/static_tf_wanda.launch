@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- static TF for Wanda -->
+
+<launch>
+  <!-- Transform from 'body' to 'camera' -->
+  <node pkg="tf" type="static_transform_publisher" name="body_to_camera_tf_publisher" 
+    args="-0.03480345, 0.01001244, 0.42488624 0.00007038, -0.00910014, -0.99994749, -0.00471136 body camera 100" />
+</launch>
