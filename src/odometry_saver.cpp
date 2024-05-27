@@ -27,7 +27,7 @@ void save_data(const std::string &dst_directory,
                const Eigen::Matrix4d &transform) {
   std::stringstream dst_filename;
   dst_filename << dst_directory << "/" << data->header.stamp.sec << "_" << std::setw(9)
-               << std::setfill('0') << data->header.stamp.nsec << ".pcd";
+               << std::setfill('0') << (data->header.stamp.nsec / 1000) * 1000 << ".pcd";
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>());
   pcl::fromROSMsg(*data, *cloud);
@@ -42,7 +42,7 @@ void save_data(const std::string &dst_directory,
                const sensor_msgs::PointCloud2ConstPtr &data) {
   std::stringstream dst_filename;
   dst_filename << dst_directory << "/" << data->header.stamp.sec << "_" << std::setw(9)
-               << std::setfill('0') << data->header.stamp.nsec << ".pcd";
+               << std::setfill('0') << (data->header.stamp.nsec / 1000) * 1000 << ".pcd";
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>());
   pcl::fromROSMsg(*data, *cloud);
@@ -54,7 +54,7 @@ void save_data(const std::string &dst_directory,
                const nav_msgs::OdometryConstPtr &data) {
   std::stringstream dst_filename;
   dst_filename << dst_directory << "/" << data->header.stamp.sec << "_" << std::setw(9)
-               << std::setfill('0') << data->header.stamp.nsec << ".odom";
+               << std::setfill('0') << (data->header.stamp.nsec / 1000) * 1000 << ".odom";
 
   const auto &pose = data->pose.pose;
 
@@ -184,28 +184,28 @@ private:
     }
 
     Eigen::Matrix4d transform =
-        lookup_eigen(endpoint_frame, points_msg->header.frame_id);
+        lookup_eigen(endpoint_frame, points_msg->header.frame_id, points_msg->header.stamp);
 
     saved_points++;
     points_save_queue.push(points_msg, transform);
   }
 
   void odometry_callback(const nav_msgs::OdometryConstPtr &odometry_msg) {
-    Eigen::Matrix4d frame2origin =
+    Eigen::Matrix4d HoriginFrame =
         lookup_eigen(origin_frame, odometry_msg->header.frame_id);
-    Eigen::Matrix4d end2child =
+    Eigen::Matrix4d HchildEnd =
         lookup_eigen(odometry_msg->child_frame_id, endpoint_frame);
 
     const auto &pose = odometry_msg->pose.pose;
-    Eigen::Matrix4d child2frame = Eigen::Matrix4d::Identity();
-    child2frame.block<3, 1>(0, 3) =
+    Eigen::Matrix4d HframeChild = Eigen::Matrix4d::Identity();
+    HframeChild.block<3, 1>(0, 3) =
         Eigen::Vector3d(pose.position.x, pose.position.y, pose.position.z);
-    child2frame.block<3, 3>(0, 0) =
+    HframeChild.block<3, 3>(0, 0) =
         Eigen::Quaterniond(pose.orientation.w, pose.orientation.x, pose.orientation.y,
                            pose.orientation.z)
             .toRotationMatrix();
 
-    Eigen::Matrix4d result = frame2origin * child2frame * end2child;
+    Eigen::Matrix4d result = HoriginFrame * HframeChild * HchildEnd;
     Eigen::Vector3d t(result.block<3, 1>(0, 3));
     Eigen::Quaterniond q(result.block<3, 3>(0, 0));
 
@@ -241,7 +241,8 @@ private:
   Eigen::Matrix4d lookup_eigen(const std::string &target, const std::string &source,
                                const ros::Time &stamp = ros::Time(0)) {
     if (!tf_listener.waitForTransform(target, source, stamp, ros::Duration(5.0))) {
-      ROS_WARN_STREAM("failed to lookup transform from " << source << " to " << target);
+      ROS_WARN_STREAM("failed to lookup transform from "
+                      << source << " to " << target << " at time " << stamp.toSec());
       return Eigen::Matrix4d::Identity();
     }
 
