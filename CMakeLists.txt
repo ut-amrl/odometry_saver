@@ -18,7 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   nav_msgs
   sensor_msgs
-  ndt_omp
 )
 
 find_package(PCL REQUIRED)

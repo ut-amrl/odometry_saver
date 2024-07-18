@@ -15,7 +15,6 @@
   <depend>pcl_ros</depend>
   <depend>nav_msgs</depend>
   <depend>sensor_msgs</depend>
-  <depend>ndt_omp</depend>
 
   <export>
   </export>
