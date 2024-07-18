@@ -1,6 +1,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <atomic>
+#include <cmath>
 #include <condition_variable>
 #include <filesystem>
 #include <fstream>
@@ -27,7 +28,8 @@ void save_data(const std::string &dst_directory,
                const Eigen::Matrix4d &transform) {
   std::stringstream dst_filename;
   dst_filename << dst_directory << "/" << data->header.stamp.sec << "_" << std::setw(9)
-               << std::setfill('0') << (data->header.stamp.nsec / 1000) * 1000 << ".pcd";
+               << std::setfill('0') << std::fixed << std::setprecision(0)
+               << std::round(data->header.stamp.nsec / 1000) * 1000 << ".pcd";
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>());
   pcl::fromROSMsg(*data, *cloud);
@@ -42,7 +44,8 @@ void save_data(const std::string &dst_directory,
                const sensor_msgs::PointCloud2ConstPtr &data) {
   std::stringstream dst_filename;
   dst_filename << dst_directory << "/" << data->header.stamp.sec << "_" << std::setw(9)
-               << std::setfill('0') << (data->header.stamp.nsec / 1000) * 1000 << ".pcd";
+               << std::setfill('0') << std::fixed << std::setprecision(0)
+               << std::round(data->header.stamp.nsec / 1000) * 1000 << ".pcd";
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>());
   pcl::fromROSMsg(*data, *cloud);
@@ -54,7 +57,8 @@ void save_data(const std::string &dst_directory,
                const nav_msgs::OdometryConstPtr &data) {
   std::stringstream dst_filename;
   dst_filename << dst_directory << "/" << data->header.stamp.sec << "_" << std::setw(9)
-               << std::setfill('0') << (data->header.stamp.nsec / 1000) * 1000 << ".odom";
+               << std::setfill('0') << std::fixed << std::setprecision(0)
+               << std::round(data->header.stamp.nsec / 1000) * 1000 << ".odom";
 
   const auto &pose = data->pose.pose;
 
@@ -183,8 +187,8 @@ private:
       return;
     }
 
-    Eigen::Matrix4d transform =
-        lookup_eigen(endpoint_frame, points_msg->header.frame_id, points_msg->header.stamp);
+    Eigen::Matrix4d transform = lookup_eigen(
+        endpoint_frame, points_msg->header.frame_id, points_msg->header.stamp);
 
     saved_points++;
     points_save_queue.push(points_msg, transform);
