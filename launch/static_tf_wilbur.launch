@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- static TF for Wanda -->
+<!-- static TF for CODa -->
 
 <launch>
   <arg name="source" default="camera"/>
@@ -7,5 +7,6 @@
   <!-- Transform from 'body' to 'camera' -->
 
   <node pkg="tf" type="static_transform_publisher" name="body_to_camera_tf_publisher" 
-    args="-0.03480345 0.01001244 0.42488624 0.00007038 -0.00910014 -0.99994749 -0.00471136 $(arg target) $(arg source) 100" />
+    args="-0.12362229 -0.00804636 0.37903270 -0.00444515 0.01011888 -0.99993774 0.00153834 $(arg target) $(arg source) 100" />
+  <!-- https://answers.ros.org/question/381529/suppress-tf_repeated_data-warnings/ -->
 </launch>
