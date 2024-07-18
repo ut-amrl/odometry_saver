@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(odometry_saver)
 
-add_definitions(-std=c++17 -msse -msse2 -msse3 -msse4 -msse4.1 -msse4.2)
-set(CMAKE_CXX_FLAGS "-std=c++17 -msse -msse2 -msse3 -msse4 -msse4.1 -msse4.2")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if (BUILD_WITH_MARCH_NATIVE)
+  add_compile_options(-march=native)
+else()
+  add_definitions(-msse -msse2 -msse3 -msse4 -msse4.1 -msse4.2)
+  set(CMAKE_CXX_FLAGS "-msse -msse2 -msse3 -msse4 -msse4.1 -msse4.2")
+endif()
 
 set(CMAKE_BUILD_TYPE "Release")
 
