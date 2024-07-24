@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- static TF for CODa -->
+
+<launch>
+  <arg name="source" default="camera"/>
+  <arg name="target" default="body"/>
+  <!-- Transform from 'body' to 'camera' -->
+
+  <node pkg="tf" type="static_transform_publisher" name="body_to_camera_tf_publisher" 
+    args="-0.108730 -0.013723 -0.337428 0.010985 -0.999871 -0.005983 -0.010039 $(arg target) $(arg source) 100" />
+  <!-- https://answers.ros.org/question/381529/suppress-tf_repeated_data-warnings/ -->
+</launch>
